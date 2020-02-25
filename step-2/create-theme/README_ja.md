@@ -1,49 +1,195 @@
-# wordpress-db-import-bash
-wordpressのDBデータをインポートファイルですべて書き換えるbashスクリプトです。
-[English](https://github.com/tadtadya/db-import-bash-for-wp/blob/master/README.md)
+# learning-wp-theme-create Step2
 
-## 要件
-- [MySQL](https://www.mysql.com/jp/) or [MarriaDB](https://mariadb.org/)
-- bashスクリプトが実行できる環境。
-- [WordPress](https://ja.wordpress.org/) + [wp-cli](https://wp-cli.org/ja/)
+## ソースコードの環境
 
-## Overview
-WordPressのDB内容を指定したインポートファイルですべて入れ替えます。処理は以下の手順で行います。
+### 要件
 
-1. DBのバックアップ作成
-1. 指定DBのすべてのテーブル削除
-1. インポートファイルでDBのリストア
-1. wp-cliを使ってDBデータのドメインを一括置換
+ソースコードのダウンロードした環境にNode.jsが必要です。
 
-## 準備
-スクリプト内の設定内容を自分の環境に合わせて編集します。
+#### Node.jsにパッケージ追加
 
-| 変数 | 設定内容 |
-|:---|:---|
-| db_name | WordPressのデータベース名 |
-| db_user | DBの接続ユーザー名 |
-| db_pass | DBの接続パスワード |
-| db_bkfile | DBのバックアップファイル名 デフォルト: wp_db_bkup_yyyymmdd_HHMMSS.sql |
-| old_domain | 変更前ドメイン |
-| new_domain | 変更後ドメイン |
-
-### 注意点
-- すべてbashの変数です。bashスクリプトの変数の使い方に合わせてください。
-- 変数の値の正当性チェックを行いません。スクリプトを実行する前に、テストをするなどして十分に内容を確認してください。
-
-## Usage
+Node.jsの環境に、ファイル監視のnodemonとパッケージ管理コマンドyarnを追加します。
 
 ```bash
-$ ./wp_db_renew.sh import.sql
+$ npm install nodemon -g
 ```
 
-### ドメインを変更しない時
-ドメインの変更をしないときは最後の2行を変更します。
+```bash
+$ npm install yarn -g
+```
 
-```vim
-#eval ${cmd7} && eval ${cmd8} && eval ${cmd9} && \
+#### プロジェクトにパッケージ追加
 
-#eval ${cmd10} && eval ${cmd11} && eval ${cmd12}
+プロジェクトにNode.jsのローカルパッケージを追加します。
 
-eval ${cmd7} && eval ${cmd8} && eval ${cmd9}
+
+create-themeディレクトリ下のpackage.jsonファイルがあるディレクトリで作業してください。
+
+インストールするローカルパッケージのリストが設定済みなので、個別インストールは不要。
+
+( パッケージリストからまとめてインストールします。)
+
+```bash
+$ yarn install
+```
+
+( node_modulesディレクトリが作られる。)
+
+## ツールの使い方
+
+js, cssファイルはwebpackで自動生成し、手動とファイル監視による自動生成の2通りがあります。
+
+プロジェクトのルートディレクトリ( package.jsonがあるところ )で実行してください。
+
+手動
+
+```
+$ yarn build
+```
+
+自動
+
+```
+$ yarn watch
+```
+
+自動では、src配下のファイルを編集・保存したり、ディレクトリ作成・削除など、変更を加えると自動的にwebpackがcss, jsファイルをdistへ出力します。
+
+プロンプトは常時起動しているので、終了は Ctrl + C を使って下さい。
+
+## ソースコードの構成
+
+```
+create-theme
+  ├ dist
+  |   └ themes
+  |       └ mine
+  |           | phpコードの置き場所。
+  |           | webpackのcss,jsファイル出力先。
+  |           | サーバーにアップロードする。
+  |           |
+  |           ├ css
+  |           |   sass(scss)から変換したcssファイル
+  |           |
+  |           ├ js
+  |           |   整形済みjsファイル
+  |           |
+  |           ├ lib
+  |           |   └ classes
+  |           |       phpクラスファイル
+  |           |
+  |           ├ templates
+  |           |   phpファイルのテンプレート
+  |           |
+  |           ├ functions.php
+  |           |
+  |           ├ index.phpなどWordPressファイル。
+  |           |
+  |           └ style.css
+  └ src
+      | 編集するjs, scssファイルの置き場所。
+      |
+      └ themes
+          └ mine
+              ├ js
+              |   jsファイル
+              |
+              └ sass
+                  scssファイル
+```
+
+## ソースコードの編集
+
+### cssの編集について
+
+cssはsass(scss)で作成しコンパイルします。直接cssファイルは編集しません。
+
+webpackは、プレフィックスの付与、縮小を自動で行います。
+
+### jsの編集について
+
+webpackは、トランスパイル、縮小を自動で行います。
+
+### 対応ブラウザについて
+
+cssのプレフィックス付与、jsのトランスパイルの対応ブラウザ・バージョンはまとめて設定しているので個々の設定は不要です。
+
+.browserslistrcに定義されています。
+
+```
+last 2 version
+```
+
+適宜、[.browserslistrc](./.browserslistrc)を編集してください。
+
+### phpの編集について
+
+#### オブジェクト指向の採用
+
+phpはオブジェクト指向（クラスファイル）で作成し、WordPressのファイル、テンプレートファイル以外はすべてクラスファイルです。
+
+#### MVCモデルを目指す
+
+WordPressでは採用されてませんが、phpクラスはMVCモデルの構成に近づけます。
+
+( index.php, single.phpなどをviewと位置づける。)
+
+#### クラスのオートロード
+
+クラスのautoload機能を実装済みです。クラスファイルのrequireは必要ありません。
+
+use演算子を使えば自動的にクラスファイルをロードします。
+
+#### psr0とWordPressの規約
+
+クラスやインタフェースの規約はpsr0に準拠します。しかし、WordPressの規約に合わせて若干の修正を行いました。
+
+- クラスファイルのディレクトリ構成とnamespaceは一致しないといけない。ただし、ディレクトリはぜんぶ小文字。
+- namespaceは必ず"MINE\\"からはじめる。
+- クラスファイルはclass-\*\*\*.php, インタフェースファイルはclass-\*\*\*-interface.php
+- インターフェース名は\*\*\*_Interface
+
+ファイル命名規則はWordPress規約、それ以外はpsr0です。そして、オリジナルでディレクトリ名は全小文字にしました。
+
+#### クラスファイルのサンプル
+
+| | |
+|:---|:---|
+| namespace | MINE\PUBLISH\CONTROLLER |
+| class | Single |
+| class | Single_Post |
+| class | Single_HTTP |
+| interface | Single_Interface |
+| interface | Single_HTTP_Interface |
+
+##### ファイル構成
+
+```
+create-theme
+  └ dist/themes/mine/lib
+      └ classes
+          └ publish
+              └ controller
+                  ├ class-single.php
+                  ├ class-single-post.php
+                  ├ class-single-http.php
+                  ├ class-single-interface.php
+                  └ class-single-http-interface.php
+```
+
+namespaceのMINEはディレクトリ構成から外してます。
+
+( MINEはclassesディレクトリに対応 )
+
+##### Usage
+
+```
+create-theme
+  └ dist/themes/mine/templates
+      └ sample.php
+```
+
+```
+use MINE\PUBLISH\CONTROLLER\Single;
+new Single();
 ```
