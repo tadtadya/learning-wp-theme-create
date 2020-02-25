@@ -1,10 +1,18 @@
 # learning-wp-theme-create Step2
 
+開発環境を準備して作業が開始できるところまでのソースコードです。
+
 ## ソースコードの環境
 
 ### 要件
 
 ソースコードのダウンロードした環境にNode.jsが必要です。
+
+### プロジェクト環境の展開
+
+コードをダウンロード後、プロジェクトの環境構築を行います。
+
+1回だけ実行します。
 
 #### Node.jsにパッケージ追加
 
@@ -37,7 +45,7 @@ $ yarn install
 
 ## ツールの使い方
 
-js, cssファイルはwebpackで自動生成し、手動とファイル監視による自動生成の2通りがあります。
+js, cssファイル生成はwebpackツールで行い、手動とファイル監視による自動生成の2通りがあります。
 
 プロジェクトのルートディレクトリ( package.jsonがあるところ )で実行してください。
 
@@ -66,7 +74,7 @@ create-theme
   |       └ mine
   |           | phpコードの置き場所。
   |           | webpackのcss,jsファイル出力先。
-  |           | サーバーにアップロードする。
+  |           | Webサーバーにアップロードする実行ファイル群。
   |           |
   |           ├ css
   |           |   sass(scss)から変換したcssファイル
@@ -79,11 +87,11 @@ create-theme
   |           |       phpクラスファイル
   |           |
   |           ├ templates
-  |           |   phpファイルのテンプレート
+  |           |   テンプレート(phpファイル)
   |           |
   |           ├ functions.php
   |           |
-  |           ├ index.phpなどWordPressファイル。
+  |           ├ index.phpなどWordPressのphpファイル。
   |           |
   |           └ style.css
   └ src
@@ -98,17 +106,34 @@ create-theme
                   scssファイル
 ```
 
+## コードのリリース
+
+Webサーバーにリリースするコードはdistディレクトリに出力されます。
+
+```
+create-theme
+  └ dist
+      └ themes
+          └ mine
+```
+
+テーマディレクトリ(mine)をそのままWebサーバーのWordPressテーマの配置場所にアップロードしてください。
+
+mineは任意です。ご自身のテーマ名をつけてください。
+
+(あわせてsrc配下のテーマ名も変更。)
+
 ## ソースコードの編集
 
-### cssの編集について
+### cssの編集
 
 cssはsass(scss)で作成しコンパイルします。直接cssファイルは編集しません。
 
-webpackは、プレフィックスの付与、縮小を自動で行います。
+webpackは、プレフィックスの付与・縮小を自動で行います。
 
-### jsの編集について
+### jsの編集
 
-webpackは、トランスパイル、縮小を自動で行います。
+webpackがトランスパイル・縮小を行うので、NextJSで書くこともできます。
 
 ### 対応ブラウザについて
 
@@ -122,7 +147,7 @@ last 2 version
 
 適宜、[.browserslistrc](./.browserslistrc)を編集してください。
 
-### phpの編集について
+### phpの編集
 
 #### オブジェクト指向の採用
 
@@ -151,9 +176,11 @@ use演算子を使えば自動的にクラスファイルをロードします�
 
 ファイル命名規則はWordPress規約、それ以外はpsr0です。そして、オリジナルでディレクトリ名は全小文字にしました。
 
+(namespaceの先頭はwpテーマ名の大文字です。mine -> MINE)
+
 #### クラスファイルのサンプル
 
-| | |
+|||
 |:---|:---|
 | namespace | MINE\PUBLISH\CONTROLLER |
 | class | Single |
@@ -193,3 +220,7 @@ create-theme
 use MINE\PUBLISH\CONTROLLER\Single;
 new Single();
 ```
+
+これで開発環境ができました。環境を自分で作りたいという人はこちらをどうぞ。
+
+[ENVIRONMENT.md](./ENVIRONMENT.md)
